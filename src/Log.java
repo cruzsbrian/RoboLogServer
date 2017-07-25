@@ -14,7 +14,11 @@ public class Log {
 	
 	private static HashMap<String, Object> buffer = new HashMap<String, Object>();
 	
-	public static void connect(int port) {
+	/**
+	 * Start the server on a specified port
+	 * @param port
+	 */
+	public static void startServer(int port) {
 		if (logserver == null) {
 			logserver = new LogServer(port);
 			logserver.start();
@@ -35,7 +39,7 @@ public class Log {
 	
 	/**
 	 * Send the data and clear the buffer to begin adding data for the next batch<br>
-	 * connect() must be called before calling this
+	 * startServer() must be called before calling this
 	 */
 	public static void send() {
 		if (logserver.isConnected()) {
