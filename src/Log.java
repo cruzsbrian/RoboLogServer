@@ -1,9 +1,5 @@
 import java.util.HashMap;
 
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.websocket.server.WebSocketHandler;
-import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
-
 import com.google.gson.Gson;
 
 public class Log {
@@ -40,11 +36,40 @@ public class Log {
 	/**
 	 * Send the data and clear the buffer to begin adding data for the next batch<br>
 	 * startServer() must be called before calling this
+	 * @param time
 	 */
 	public static void send() {
+		// put the buffer in a hashmap along with the data type (for the client to know what it's receiving)
+		HashMap<String, Object> data = new HashMap<String, Object>();
+		data.put("type", "graph");
+		data.put("data", buffer);
+		
+		sendAsJson(data);
+	}
+	
+	/**
+	 * Send a log to the dashboard<br>
+	 * startServer() must be called before this
+	 * @param caller
+	 * @param msg
+	 */
+	public static void log(Object caller, String msg) {
+		HashMap<String, String> data = new HashMap<String, String>();
+		data.put("type", "log");
+		data.put("sender", caller.getClass().getSimpleName());
+		data.put("msg", msg);
+		
+		sendAsJson(data);
+	}
+	
+	/**
+	 * Convert object to JSON and send it through logserver
+	 * @param data
+	 */
+	private static void sendAsJson(Object data) {
+		String jsonStr = gson.toJson(data);
+		
 		if (logserver.isConnected()) {
-			String jsonStr = gson.toJson(buffer);
-			
 			try {
 				logserver.send(jsonStr);
 			} catch (Exception e) {
