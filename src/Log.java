@@ -10,6 +10,8 @@ public class Log {
 	
 	private static HashMap<String, Object> buffer = new HashMap<String, Object>();
 	
+	private static long startTime;
+	
 	/**
 	 * Start the server on a specified port
 	 * @param port
@@ -18,6 +20,8 @@ public class Log {
 		if (logserver == null) {
 			logserver = new LogServer(port);
 			logserver.start();
+			
+			startTime = System.currentTimeMillis();
 		} else {
 			printRoboLog();
 			System.out.println("Error: already started server");
@@ -39,10 +43,16 @@ public class Log {
 	 * @param time
 	 */
 	public static void send() {
+		// calculate current time in seconds
+		double t = ((double) (System.currentTimeMillis() - startTime)) / 1000;
+		
+		// add the current time to the data buffer
+		buffer.put("t", t);
+		
 		// put the buffer in a hashmap along with the data type (for the client to know what it's receiving)
 		HashMap<String, Object> data = new HashMap<String, Object>();
 		data.put("type", "graph");
-		data.put("data", buffer);
+		data.put("obj", buffer);
 		
 		sendAsJson(data);
 	}
@@ -53,8 +63,9 @@ public class Log {
 	 * @param caller
 	 * @param msg
 	 */
-	public static void log(Object caller, String msg) {
-		HashMap<String, String> data = new HashMap<String, String>();
+	public static void log(String subject, String msg) {
+		// calculate current time in seconds
+		double t = ((double) (System.currentTimeMillis() - startTime)) / 1000;
 		data.put("type", "log");
 		data.put("sender", caller.getClass().getSimpleName());
 		data.put("msg", msg);
