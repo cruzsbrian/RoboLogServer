@@ -60,15 +60,22 @@ public class Log {
 	/**
 	 * Send a log to the dashboard<br>
 	 * startServer() must be called before this
-	 * @param caller
+	 * @param subject
 	 * @param msg
 	 */
 	public static void log(String subject, String msg) {
 		// calculate current time in seconds
 		double t = ((double) (System.currentTimeMillis() - startTime)) / 1000;
+		
+		// make a hashmap to hold all the log info
+		HashMap<String, Object> log = new HashMap<String, Object>();
+		log.put("t", t);
+		log.put("subject", subject);
+		log.put("msg", msg);
+		
+		HashMap<String, Object> data = new HashMap<String, Object>();
 		data.put("type", "log");
-		data.put("sender", caller.getClass().getSimpleName());
-		data.put("msg", msg);
+		data.put("obj", log);
 		
 		sendAsJson(data);
 	}
