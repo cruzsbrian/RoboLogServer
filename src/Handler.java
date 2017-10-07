@@ -1,4 +1,7 @@
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
@@ -7,10 +10,14 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 
+import com.google.gson.Gson;
+
 public class Handler implements WebSocketListener {
 	
 	static Session session;
 	static boolean connected = false;
+	
+	private static Gson gson = new Gson();
 	
 	@OnWebSocketClose
 	public void onWebSocketClose(int statusCode, String reason) {
@@ -36,7 +43,19 @@ public class Handler implements WebSocketListener {
 	}
 	
 	@OnWebSocketMessage
-	public void onWebSocketMessage(String msg) {}
+	public void onWebSocketMessage(String msg) {
+		HashMap<String, Object> data = gson.fromJson(msg, HashMap.class);
+		if (data.get("type") == "constants") {
+			try {
+				List<HashMap<String, Object>> constants = (List<HashMap<String, Object>>) data.get("obj");
+				Constants.addAll(constants);
+			} catch (Exception e) {
+				Log.printRoboLog();
+				System.out.println("Error parsing constants from client");
+				e.printStackTrace();
+			}
+		}
+	}
 	
 	public static void push(String msg) throws Exception {
 		session.getRemote().sendString(msg);
