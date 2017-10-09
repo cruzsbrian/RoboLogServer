@@ -1,3 +1,4 @@
+package com.cruzsbrian.robolog;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;

@@ -1,3 +1,4 @@
+package com.cruzsbrian.robolog;
 import java.util.HashMap;
 
 import com.google.gson.Gson;

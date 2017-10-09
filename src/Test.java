@@ -1,3 +1,5 @@
+import com.cruzsbrian.robolog.Constants;
+import com.cruzsbrian.robolog.Log;
 
 public class Test {
 
