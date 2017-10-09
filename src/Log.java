@@ -84,7 +84,7 @@ public class Log {
 	 * Convert object to JSON and send it through logserver
 	 * @param data
 	 */
-	private static void sendAsJson(Object data) {
+	protected static void sendAsJson(Object data) {
 		String jsonStr = gson.toJson(data);
 		
 		if (logserver.isConnected()) {

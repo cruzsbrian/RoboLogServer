@@ -36,6 +36,8 @@ public class Handler implements WebSocketListener {
 
 		session = s;
 		connected = true;
+
+        Constants.sendConstants();
 	}
 
 	@OnWebSocketMessage
@@ -67,7 +69,13 @@ public class Handler implements WebSocketListener {
 
 			if (dataType.equals("constants")) {
 				JsonArray constants = data.getAsJsonArray("obj");
-				System.out.println(constants.toString());
+				Constants.addAll(constants);
+
+				// store the constants as defaults if needed
+                boolean makeDefaults = data.get("defaults").getAsBoolean();
+                if (makeDefaults) {
+                    Constants.writeToFile();
+                }
 			}
 		} else {
 			Log.printRoboLog();

@@ -2,7 +2,7 @@
 public class Test {
 
 	public static void main(String[] args) throws InterruptedException {
-		System.out.println("connecting");
+        Constants.loadFromFile();
 		Log.startServer(8765);
 
 //		Thread.sleep(10000);
