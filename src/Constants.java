@@ -1,4 +1,3 @@
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -18,8 +17,6 @@ public class Constants {
 
     private static Properties constants = new Properties();
     private static String constantsFileName = "robolog-constants.properties";
-
-    private static Gson gson = new Gson();
 
 	public static int getAsInt(String key) {
 	    String val = constants.getProperty(key);
@@ -67,6 +64,9 @@ public class Constants {
             InputStream input = new FileInputStream(constantsFileName);
             constants.load(input);
 
+            Log.printRoboLog();
+            System.out.println("Successfully read constants from" + constantsFileName);
+
         } catch (FileNotFoundException e) {
             Log.printRoboLog();
             System.out.println("Couldn't find constants file. Will make a new one once defaults are set.");
@@ -82,6 +82,9 @@ public class Constants {
 
             OutputStream output = new FileOutputStream(constantsFileName);
             constants.store(output, null);
+
+            Log.printRoboLog();
+            System.out.println("Successfully wrote constants to" + constantsFileName);
 
         } catch (FileNotFoundException e) {
             Log.printRoboLog();
