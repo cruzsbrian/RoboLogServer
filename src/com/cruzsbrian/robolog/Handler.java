@@ -13,76 +13,76 @@ import com.google.gson.JsonParser;
 
 public class Handler implements WebSocketListener {
 
-	static Session session;
-	static boolean connected = false;
+    static Session session;
+    static boolean connected = false;
 
-	@OnWebSocketClose
-	public void onWebSocketClose(int statusCode, String reason) {
-		Log.printRoboLog();
-		System.out.println("Connection closed");
+    @OnWebSocketClose
+    public void onWebSocketClose(int statusCode, String reason) {
+        Log.printRoboLog();
+        System.out.println("Connection closed");
 
-		connected = false;
-	}
+        connected = false;
+    }
 
-	@OnWebSocketError
-	public void onWebSocketError(Throwable t) {
-		Log.printRoboLog();
-		System.out.println("Error: " + t.getMessage());
-	}
+    @OnWebSocketError
+    public void onWebSocketError(Throwable t) {
+        Log.printRoboLog();
+        System.out.println("Error: " + t.getMessage());
+    }
 
-	@OnWebSocketConnect
-	public void onWebSocketConnect(Session s) {
-		Log.printRoboLog();
-		System.out.println("Connection opened with client");
+    @OnWebSocketConnect
+    public void onWebSocketConnect(Session s) {
+        Log.printRoboLog();
+        System.out.println("Connection opened with client");
 
-		session = s;
-		connected = true;
+        session = s;
+        connected = true;
 
         Constants.sendConstants();
-	}
+    }
 
-	@OnWebSocketMessage
-	public void onWebSocketMessage(String msg) {}
+    @OnWebSocketMessage
+    public void onWebSocketMessage(String msg) {}
 
-	public static void push(String msg) throws Exception {
-		session.getRemote().sendString(msg);
-	}
+    public static void push(String msg) throws Exception {
+        session.getRemote().sendString(msg);
+    }
 
-	public static boolean isConnected() {
-		return connected;
-	}
+    public static boolean isConnected() {
+        return connected;
+    }
 
-	@Override
-	public void onWebSocketBinary(byte[] arg0, int arg1, int arg2) {}
+    @Override
+    public void onWebSocketBinary(byte[] arg0, int arg1, int arg2) {}
 
-	@Override
-	public void onWebSocketText(String msg) {
-		JsonParser parser = new JsonParser();
+    @Override
+    public void onWebSocketText(String msg) {
+        JsonParser parser = new JsonParser();
 
-		JsonElement root = parser.parse(msg);
-		if (root.isJsonObject()) {
-			JsonObject data = root.getAsJsonObject();
+        JsonElement root = parser.parse(msg);
+        if (root.isJsonObject()) {
+            JsonObject data = root.getAsJsonObject();
 
-			String dataType = data.get("type").getAsString();
+            String dataType = data.get("type").getAsString();
 
-			Log.printRoboLog();
-			System.out.println("Received " + dataType + " from client");
+            Log.printRoboLog();
+            System.out.println("Received " + dataType + " from client");
 
-			if (dataType.equals("constants")) {
-				JsonArray constants = data.getAsJsonArray("obj");
-				Constants.addAll(constants);
+            if (dataType.equals("constants")) {
+                JsonArray constants = data.getAsJsonArray("obj");
+                Constants.addAll(constants);
 
-				// store the constants as defaults if needed
+                // store the constants as defaults if needed
                 boolean makeDefaults = data.get("defaults").getAsBoolean();
                 if (makeDefaults) {
                     Constants.writeToFile();
                 }
-			}
-		} else {
-			Log.printRoboLog();
-			System.out.println("Error parsing JSON from client:");
-			System.out.println(msg);
-		}
-	}
+            }
+        } else {
+            Log.printRoboLog();
+            System.out.println("Error parsing JSON from client:");
+            System.out.println(msg);
+        }
+    }
 
 }

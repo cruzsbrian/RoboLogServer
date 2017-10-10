@@ -19,16 +19,16 @@ public class Constants {
     private static Properties constants = new Properties();
     private static String constantsFileName = "robolog-constants.properties";
 
-	public static int getAsInt(String key) {
-	    String val = constants.getProperty(key);
-	    try {
+    public static int getAsInt(String key) {
+        String val = constants.getProperty(key);
+        try {
             return Integer.parseInt(val);
         } catch (NumberFormatException e) {
-	        Log.printRoboLog();
+            Log.printRoboLog();
             System.out.println("Couldn't convert " + val + " to an integer. Returning 0.");
             return 0;
         }
-	}
+    }
 
     public static double getAsDouble(String key) {
         String val = constants.getProperty(key);
@@ -45,21 +45,21 @@ public class Constants {
         return constants.getProperty(key);
     }
 
-	public static void add(String key, Object val) {
-		constants.setProperty(key, val.toString());
-	}
-
-	protected static void addAll(JsonArray list) {
-		for (int i = 0; i < list.size(); i++) {
-			System.out.println(list.get(i).toString());
-			
-			JsonObject constant = list.get(i).getAsJsonObject();
-
-			add(constant.get("key").getAsString(), constant.get("val").getAsString());
-		}
+    public static void add(String key, Object val) {
+        constants.setProperty(key, val.toString());
     }
 
-	public static void loadFromFile() {
+    protected static void addAll(JsonArray list) {
+        for (int i = 0; i < list.size(); i++) {
+            System.out.println(list.get(i).toString());
+
+            JsonObject constant = list.get(i).getAsJsonObject();
+
+            add(constant.get("key").getAsString(), constant.get("val").getAsString());
+        }
+    }
+
+    public static void loadFromFile() {
         try {
 
             InputStream input = new FileInputStream(constantsFileName);
@@ -100,7 +100,7 @@ public class Constants {
 
     protected static void sendConstants() {
         // create list of constants as objects
-	    List<Constant> constantsList = new ArrayList<Constant>();
+        List<Constant> constantsList = new ArrayList<Constant>();
         for (String key : constants.stringPropertyNames()) {
             Constant c = new Constant();
             c.key = key;
@@ -128,7 +128,7 @@ public class Constants {
 
     // format of one constant in json
     static class Constant {
-	    String key, val;
+        String key, val;
     }
 
 }
