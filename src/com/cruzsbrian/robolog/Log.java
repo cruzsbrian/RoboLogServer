@@ -2,16 +2,20 @@ package com.cruzsbrian.robolog;
 import java.util.HashMap;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
-public class Log {
+public class Log extends Thread {
 
     private static LogServer logserver = null;
 
     private static Gson gson = new Gson();
 
-    private static HashMap<String, Object> buffer = new HashMap<String, Object>();
+    private static JsonArray buffer = new JsonArray();
 
     private static long startTime;
+    
+    private static int batchDelay = 50;
 
     /**
      * Start the server on a specified port
@@ -23,10 +27,21 @@ public class Log {
             logserver.start();
 
             startTime = System.currentTimeMillis();
+            
+            (new Log()).start();
         } else {
             printRoboLog();
             System.out.println("Error: already started server");
         }
+    }
+    
+    /**
+     * Set the delay between batches of graph data<br>
+     * A longer delay puts less load on your RoboRIO
+     * @param delay
+     */
+    public static void setDelay(int delay) {
+    	batchDelay = delay;
     }
 
     /**
@@ -34,8 +49,20 @@ public class Log {
      * @param key
      * @param value
      */
-    public static void add(String key, Object value) {
-        buffer.put(key, value);
+    public static void add(String key, Double value) {
+    	JsonObject dataPoint = new JsonObject();
+    	
+    	// calculate current time in seconds
+        double t = ((double) (System.currentTimeMillis() - startTime)) / 1000;
+
+        // add the current time
+        dataPoint.addProperty("t", t);
+    	
+        // add the user's data
+        dataPoint.addProperty(key, value);
+        
+        // append to the buffer
+        buffer.add(dataPoint);
     }
 
     /**
@@ -43,19 +70,22 @@ public class Log {
      * startServer() must be called before calling this
      * @param time
      */
-    public static void send() {
-        // calculate current time in seconds
-        double t = ((double) (System.currentTimeMillis() - startTime)) / 1000;
-
-        // add the current time to the data buffer
-        buffer.put("t", t);
-
-        // put the buffer in a hashmap along with the data type (for the client to know what it's receiving)
-        HashMap<String, Object> data = new HashMap<String, Object>();
-        data.put("type", "graph");
-        data.put("obj", buffer);
-
-        sendAsJson(data);
+    private static void send() {
+    	if (buffer.size() > 0) {
+    		// copy the buffer to avoid concurrent modification errors
+    		JsonArray copyOfBuffer = new JsonArray();
+    		copyOfBuffer.addAll(buffer);
+    		
+	        // clear the buffer for the next batch
+	        buffer = new JsonArray();
+    		
+	        // put the buffer in a hashmap along with the data type (for the client to know what it's receiving)
+	        HashMap<String, Object> data = new HashMap<String, Object>();
+	        data.put("type", "graph");
+	        data.put("obj", copyOfBuffer);
+	
+	        sendAsJson(data);
+    	}
     }
 
     /**
@@ -103,10 +133,21 @@ public class Log {
     }
 
     /*
-     * Print "[RoboLog]" in blue. Should be called before printing any status message
+     * Print "[RoboLog]". Should be called before printing any status message
      */
     protected static void printRoboLog() {
-        System.out.print(Colors.ANSI_CYAN + "[RoboLog] " + Colors.ANSI_RESET);
+        System.out.print("[RoboLog] ");
+    }
+    
+    public void run() {
+    	while (true) {
+    		try {
+				sleep(batchDelay);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+    		send();
+    	}
     }
 
 }
