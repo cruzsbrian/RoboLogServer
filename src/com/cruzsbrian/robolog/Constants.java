@@ -68,6 +68,9 @@ public class Constants {
     }
 
     protected static void addAll(JsonArray list) {
+    	// clear the list first (in case one was deleted on the client side)
+    	constants.clear();
+    	
         for (int i = 0; i < list.size(); i++) {
             System.out.println(list.get(i).toString());
 
@@ -81,6 +84,8 @@ public class Constants {
         try {
 
             InputStream input = new FileInputStream(constantsFileName);
+            
+            constants.clear();
             constants.load(input);
 
             Log.printRoboLog();
