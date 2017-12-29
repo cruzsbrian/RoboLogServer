@@ -133,7 +133,7 @@ public class Constants {
 
         // create constants object
         ConstantsSend cs = new ConstantsSend();
-        cs.obj = constantsList;
+        cs.constants = constantsList;
 
         // convert to JSON and send
         Log.sendAsJson(cs);
@@ -146,7 +146,7 @@ public class Constants {
     // format of json sent
     static class ConstantsSend {
         String type = "constants";
-        List<Constant> obj;
+        List<Constant> constants;
     }
 
     // format of one constant in json

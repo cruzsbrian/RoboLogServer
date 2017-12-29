@@ -70,7 +70,7 @@ public class Handler implements WebSocketListener {
             
             // if receiving constants
             if (dataType.equals("constants")) {
-                JsonArray constants = data.getAsJsonArray("obj");
+                JsonArray constants = data.getAsJsonArray("constants");
                 Constants.addAll(constants);
 
                 // store the constants as defaults if needed
@@ -82,7 +82,7 @@ public class Handler implements WebSocketListener {
             
             // if receiving a request
             if (dataType.equals("request")) {
-            	String requestedName = data.get("obj").getAsString();
+            	String requestedName = data.get("requestedName").getAsString();
             	
             	// if requesting (default) constants, recall and then send
             	if (requestedName.equals("constants")) {

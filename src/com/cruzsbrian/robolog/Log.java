@@ -97,38 +97,30 @@ public class Log extends Thread {
      * @param time
      */
     private static void send() {
-    	// send graph data if there is graph data
-    	if (bufferGraph.size() > 0) {
-    		// copy the buffer to avoid concurrent modification errors
-    		JsonArray copyOfBuffer = new JsonArray();
-    		copyOfBuffer.addAll(bufferGraph);
-    		
+    	if (bufferGraph.size() > 0 || bufferLog.size() > 0) {
+	        // hashmap with the data type (for the client to know what it's receiving)
+	        HashMap<String, Object> data = new HashMap<String, Object>();
+	        data.put("type", "data");
+	        
+	        // Graph data
+			// copy the buffer to avoid concurrent modification errors
+			JsonArray copyOfBuffer = new JsonArray();
+			copyOfBuffer.addAll(bufferGraph);
+			
 	        // clear the buffer for the next batch
 	        bufferGraph = new JsonArray();
-    		
-	        // put the buffer in a hashmap along with the data type (for the client to know what it's receiving)
-	        HashMap<String, Object> data = new HashMap<String, Object>();
-	        data.put("type", "graph");
-	        data.put("obj", copyOfBuffer);
-	
-	        sendAsJson(data);
-    	}
-    	
-    	// send log data if there is log data
-    	if (bufferLog.size() > 0) {
-    		// copy the buffer to avoid concurrent modification errors
-    		JsonArray copyOfBuffer = new JsonArray();
-    		copyOfBuffer.addAll(bufferLog);
-    		
+	        data.put("graph", copyOfBuffer);
+		
+	        // Log data
+			// copy the buffer to avoid concurrent modification errors
+			copyOfBuffer = new JsonArray();
+			copyOfBuffer.addAll(bufferLog);
+			
 	        // clear the buffer for the next batch
 	        bufferLog = new JsonArray();
-    		
-	        // put the buffer in a hashmap along with the data type (for the client to know what it's receiving)
-	        HashMap<String, Object> data = new HashMap<String, Object>();
-	        data.put("type", "log");
-	        data.put("obj", copyOfBuffer);
-	
-	        sendAsJson(data);
+	        data.put("log", copyOfBuffer);
+	    	
+	    	sendAsJson(data);
     	}
     }
 
