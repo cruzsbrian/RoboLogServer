@@ -67,7 +67,8 @@ public class Handler implements WebSocketListener {
 
             Log.printRoboLog();
             System.out.println("Received " + dataType + " from client");
-
+            
+            // if receiving constants
             if (dataType.equals("constants")) {
                 JsonArray constants = data.getAsJsonArray("obj");
                 Constants.addAll(constants);
@@ -77,6 +78,17 @@ public class Handler implements WebSocketListener {
                 if (makeDefaults) {
                     Constants.writeToFile();
                 }
+            }
+            
+            // if receiving a request
+            if (dataType.equals("request")) {
+            	String requestedName = data.get("obj").getAsString();
+            	
+            	// if requesting (default) constants, recall and then send
+            	if (requestedName.equals("constants")) {
+            		Constants.loadFromFile();
+            		Constants.sendConstants();
+            	}
             }
         } else {
             Log.printRoboLog();

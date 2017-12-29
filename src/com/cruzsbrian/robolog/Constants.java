@@ -84,7 +84,7 @@ public class Constants {
             constants.load(input);
 
             Log.printRoboLog();
-            System.out.println("Successfully read constants from" + constantsFileName);
+            System.out.println("Successfully read constants from " + constantsFileName);
 
         } catch (FileNotFoundException e) {
             Log.printRoboLog();
