@@ -11,10 +11,13 @@ public class Log extends Thread {
 
     private static Gson gson = new Gson();
 
-    private static JsonArray buffer = new JsonArray();
+    // buffers to hold data waiting to be sent
+    private static JsonArray bufferGraph = new JsonArray();
+    private static JsonArray bufferLog = new JsonArray();
 
     private static long startTime;
-    
+
+    // delay between sending batches of data
     private static int batchDelay = 50;
 
     /**
@@ -28,6 +31,7 @@ public class Log extends Thread {
 
             startTime = System.currentTimeMillis();
             
+            // start the data sending
             (new Log()).start();
         } else {
             printRoboLog();
@@ -62,7 +66,29 @@ public class Log extends Thread {
         dataPoint.addProperty(key, value);
         
         // append to the buffer
-        buffer.add(dataPoint);
+        bufferGraph.add(dataPoint);
+    }
+
+    /**
+     * Add a log to send to the client<br>
+     * startServer() must be called before this
+     * @param subject
+     * @param msg
+     */
+    public static void log(String subject, String msg) {
+    	JsonObject logData = new JsonObject();
+    	
+        // calculate current time in seconds
+        double t = ((double) (System.currentTimeMillis() - startTime)) / 1000;
+        
+        // add the current time
+        logData.addProperty("t", t);
+        
+        // add the user's data
+        logData.addProperty("subject", subject);
+        logData.addProperty("msg", msg);
+
+        bufferLog.add(logData);
     }
 
     /**
@@ -71,13 +97,14 @@ public class Log extends Thread {
      * @param time
      */
     private static void send() {
-    	if (buffer.size() > 0) {
+    	// send graph data if there is graph data
+    	if (bufferGraph.size() > 0) {
     		// copy the buffer to avoid concurrent modification errors
     		JsonArray copyOfBuffer = new JsonArray();
-    		copyOfBuffer.addAll(buffer);
+    		copyOfBuffer.addAll(bufferGraph);
     		
 	        // clear the buffer for the next batch
-	        buffer = new JsonArray();
+	        bufferGraph = new JsonArray();
     		
 	        // put the buffer in a hashmap along with the data type (for the client to know what it's receiving)
 	        HashMap<String, Object> data = new HashMap<String, Object>();
@@ -86,29 +113,23 @@ public class Log extends Thread {
 	
 	        sendAsJson(data);
     	}
-    }
-
-    /**
-     * Send a log to the dashboard<br>
-     * startServer() must be called before this
-     * @param subject
-     * @param msg
-     */
-    public static void log(String subject, String msg) {
-        // calculate current time in seconds
-        double t = ((double) (System.currentTimeMillis() - startTime)) / 1000;
-
-        // make a hashmap to hold all the log info
-        HashMap<String, Object> log = new HashMap<String, Object>();
-        log.put("t", t);
-        log.put("subject", subject);
-        log.put("msg", msg);
-
-        HashMap<String, Object> data = new HashMap<String, Object>();
-        data.put("type", "log");
-        data.put("obj", log);
-
-        sendAsJson(data);
+    	
+    	// send log data if there is log data
+    	if (bufferLog.size() > 0) {
+    		// copy the buffer to avoid concurrent modification errors
+    		JsonArray copyOfBuffer = new JsonArray();
+    		copyOfBuffer.addAll(bufferLog);
+    		
+	        // clear the buffer for the next batch
+	        bufferLog = new JsonArray();
+    		
+	        // put the buffer in a hashmap along with the data type (for the client to know what it's receiving)
+	        HashMap<String, Object> data = new HashMap<String, Object>();
+	        data.put("type", "log");
+	        data.put("obj", copyOfBuffer);
+	
+	        sendAsJson(data);
+    	}
     }
 
     /**
@@ -121,6 +142,9 @@ public class Log extends Thread {
         if (logserver.isConnected()) {
             try {
                 logserver.send(jsonStr);
+            } catch (IllegalStateException e) {	// Too many things being sent
+            	printRoboLog();
+            	System.out.println("Error sending data: queue is currently full. Data will be sent once queue is empty");
             } catch (Exception e) {
                 printRoboLog();
                 System.out.println("Error sending data");
