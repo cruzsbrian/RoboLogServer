@@ -21,22 +21,40 @@ public class Constants {
 
     public static int getAsInt(String key) {
         String val = constants.getProperty(key);
+        
+        // getProperty returns null if it can't find it
+        if (val == null) {
+        	Log.printRoboLog();
+        	System.out.println("Constant for key '" + key + "' was not found. Returning 0");
+        	return 0;
+        }
+        
+        // attempt to convert to an integer
         try {
             return Integer.parseInt(val);
         } catch (NumberFormatException e) {
             Log.printRoboLog();
-            System.out.println("Couldn't convert " + val + " to an integer. Returning 0.");
+            System.out.println("Couldn't convert " + val + " to an integer. Returning 0");
             return 0;
         }
     }
 
     public static double getAsDouble(String key) {
         String val = constants.getProperty(key);
+        
+        // getProperty returns null if it can't find it
+        if (val == null) {
+        	Log.printRoboLog();
+        	System.out.println("Constant for key '" + key + "' was not found. Returning 0");
+        	return 0;
+        }
+        
+        // attempt to convert to a double
         try {
             return Double.parseDouble(val);
         } catch (NumberFormatException e) {
             Log.printRoboLog();
-            System.out.println("Couldn't convert " + val + " to a double. Returning 0.");
+            System.out.println("Couldn't convert " + val + " to a double. Returning 0");
             return 0;
         }
     }
@@ -85,7 +103,7 @@ public class Constants {
             constants.store(output, null);
 
             Log.printRoboLog();
-            System.out.println("Successfully wrote constants to" + constantsFileName);
+            System.out.println("Successfully wrote constants to " + constantsFileName);
 
         } catch (FileNotFoundException e) {
             Log.printRoboLog();
