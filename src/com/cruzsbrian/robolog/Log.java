@@ -55,12 +55,9 @@ public class Log extends Thread {
      */
     public static void add(String key, Double value) {
     	JsonObject dataPoint = new JsonObject();
-    	
-    	// calculate current time in seconds
-        double t = ((double) (System.currentTimeMillis() - startTime)) / 1000;
 
         // add the current time
-        dataPoint.addProperty("t", t);
+        dataPoint.addProperty("t", getCurrentTime());
     	
         // add the user's data
         dataPoint.addProperty(key, value);
@@ -75,18 +72,15 @@ public class Log extends Thread {
      * @param subject
      * @param msg
      */
-    public static void log(String subject, String msg) {
+    public static void log(String subject, Object msg) {
     	JsonObject logData = new JsonObject();
-    	
-        // calculate current time in seconds
-        double t = ((double) (System.currentTimeMillis() - startTime)) / 1000;
         
         // add the current time
-        logData.addProperty("t", t);
+        logData.addProperty("t", getCurrentTime());
         
         // add the user's data
         logData.addProperty("subject", subject);
-        logData.addProperty("msg", msg);
+        logData.addProperty("msg", msg.toString());
 
         bufferLog.add(logData);
     }
@@ -134,9 +128,6 @@ public class Log extends Thread {
         if (logserver.isConnected()) {
             try {
                 logserver.send(jsonStr);
-            } catch (IllegalStateException e) {	// Too many things being sent
-            	printRoboLog();
-            	System.out.println("Error sending data: queue is currently full. Data will be sent once queue is empty");
             } catch (Exception e) {
                 printRoboLog();
                 System.out.println("Error sending data");
@@ -146,6 +137,14 @@ public class Log extends Thread {
             printRoboLog();
             System.out.println("Error: server is not yet connected");
         }
+    }
+    
+    /**
+     * Returns time in seconds since log was started
+     * @return
+     */
+    public static double getCurrentTime() {
+    	return ((double) (System.currentTimeMillis() - startTime)) / 1000;
     }
 
     /*
