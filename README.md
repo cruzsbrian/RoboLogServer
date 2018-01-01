@@ -55,3 +55,55 @@ This returns an double representation of the constant for the given key. If it c
 `Constants.getAsString(String key)`
 
 This returns the raw value of the constant as a String.
+
+## Example
+Here's an example of how you might implement RoboLog in robot code.
+```java
+import com.cruzsbrian.robolog.Constants;
+import com.cruzsbrian.robolog.Log;
+
+import edu.wpi.first.wpilibj.IterativeRobot;
+
+public class Robot extends IterativeRobot {
+
+	public void robotInit() {
+		Constants.loadFromFile();
+		Log.startServer(1234);
+	}
+
+	public void autonomousInit() {
+		Log.log("general", "starting auto");
+		autoRoutine.start();
+	}
+
+	public void autonomousPeriodic() {
+		Log.add("distance-traveled", Robot.drivetrain.getDist());
+		Log.add("yaw", Robot.drivetrain.getYaw());
+	}
+	
+	public void teleopInit() {
+		Log.log("general", "starting teleop");
+	}
+
+	public void teleopPeriodic() {
+		// the following code would normally be elsewhere than Robot.java
+		// but you get the idea
+		
+		if (shootButtonPressed()) {
+			Log.log("shooter", "spinning up flywheel");
+			shooter.spinUpTo(Constants.getAsInt("optimum-flywheel-speed"));
+		}
+		
+		if (shooter.atSpeed()) {
+			Log.log("shooter", "shooter at speed. starting feeder");
+			feeder.feed();
+		}
+		
+		if (shooter.spinning()) {
+			Log.add("flywheel-speed", shooter.flywheelSpeed());
+		}
+	}
+}
+```
+
+When the robot code starts, it loads the constants and starts the server so that the client can connect to it. In autonomous, it uses graphs to record the distance traveled and the robot's yaw at each step. In teleop, it uses logs to record that it attempted to spin up the flywheel and start the feeder. It also uses graphs to track the flywheel's speed, and a constant called "optimum-flywheel-speed," which can be updated from the client without having to re-deploy. 
