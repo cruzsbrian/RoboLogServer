@@ -107,3 +107,13 @@ public class Robot extends IterativeRobot {
 ```
 
 When the robot code starts, it loads the constants and starts the server so that the client can connect to it. In autonomous, it uses graphs to record the distance traveled and the robot's yaw at each step. In teleop, it uses logs to record that it attempted to spin up the flywheel and start the feeder. It also uses graphs to track the flywheel's speed, and a constant called "optimum-flywheel-speed," which can be updated from the client without having to re-deploy. 
+
+
+## Building From Source
+I have future plans to learn and use Gradle for building, but for now I have a .jar file with the dependencies. Here is the current process to build. I know it hurts.
+1. Clone/download the repository.
+2. Compile the source.
+3. Copy the compiled files (including the directory structure for packages starting at `com`) into `robolog-server-dependencies.jar`.
+4. Rename to `robolog-server.jar`.
+
+If you introduce new dependencies, copy them into `robolog-server-dependencies.jar` and commit. That way, if those changes are merged into `master`, collaborators will get the dependencies too.
